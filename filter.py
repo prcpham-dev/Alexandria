@@ -33,14 +33,27 @@ INPUT_DIR  = BASE_DIR / "input"
 OUTPUT_DIR = BASE_DIR / "output"
 
 # ── Regex: strip leading numbers / timestamps ─────────────────────────────────
-# Matches things like: "1. ", "2) ", "[3] ", "00:12 ", "1:23:45 ", and combos
+# Matches prefixes like: "1. ", "2) ", "[3] ", "00:12 ", "1:23:45 ", and combos
 _STRIP_PREFIX = re.compile(
     r"^"
     r"(?:"
-        r"(?:\[?\d+\]?[\.\):\-]?\s*)"   # number: 1. / 1) / [1] / 1:
+        r"(?:\[?\d+\]?[\.\):\-]?\s*)"        # number: 1. / 1) / [1] / 1:
         r"|"
-        r"(?:\d{1,2}:\d{2}(?::\d{2})?\s*)"  # timestamp: 00:00 / 00:00:00
+        r"(?:\d{1,2}:\d{2}(?::\d{2})?\s*)"   # timestamp: 00:00 / 00:00:00
     r")+"
+)
+
+# ── Regex: skip the entire line ───────────────────────────────────────────────
+# Whole lines that are pure timestamps / time labels and carry no content.
+_SKIP_LINE = re.compile(
+    r"^"
+    r"(?:"
+        r"\d{1,2}:\d{2}(?::\d{2})?"              # 13:38  or  1:23:45
+        r"|"
+        r"\d+\s+minutes?,\s*\d+\s+seconds?"      # 13 minutes, 38 seconds
+        r"|"
+        r"\d+\s+hours?,\s*\d+\s+minutes?,\s*\d+\s+seconds?"  # 1 hour, 2 minutes, 3 seconds
+    r")\s*$"
 )
 
 
@@ -52,13 +65,18 @@ def strip_prefix(text: str) -> str:
 def process_paragraphs(raw_lines: list[str]) -> list[str]:
     """
     Apply the merge/split logic:
-      - lower-case first char  → append to previous paragraph
-      - upper-case first char  → new paragraph
-    Returns a list of clean paragraph strings.
+      - Lines that are pure timestamps / time labels  → skipped entirely
+      - lower-case first char  → append to previous paragraph (continuation)
+      - upper-case first char  → new paragraph (blank line separator added)
+    Returns a list of strings; empty strings represent blank lines.
     """
     paragraphs: list[str] = []
 
     for raw in raw_lines:
+        # Drop lines that are entirely a timestamp / time label
+        if _SKIP_LINE.match(raw.strip()):
+            continue
+
         text = strip_prefix(raw).strip()
 
         # Skip completely empty lines after stripping
@@ -68,10 +86,13 @@ def process_paragraphs(raw_lines: list[str]) -> list[str]:
         first_char = text[0]
 
         if paragraphs and first_char.islower():
-            # Continuation – join with a space
+            # Continuation – join to previous paragraph with a space
             paragraphs[-1] = paragraphs[-1].rstrip() + " " + text
         else:
-            # New paragraph (upper-case, digit, punctuation, or very first)
+            # New paragraph starting with uppercase (or very first paragraph)
+            # Insert a blank line separator before it (except at the very start)
+            if paragraphs:
+                paragraphs.append("")   # blank line between paragraphs
             paragraphs.append(text)
 
     return paragraphs
@@ -119,7 +140,7 @@ def main():
     print(f"Found {len(docx_files)} file(s) to process...\n")
 
     for src in docx_files:
-        dst = OUTPUT_DIR / src.name
+        dst = OUTPUT_DIR / (src.stem + "_filtered" + src.suffix)
         try:
             process_docx(src, dst)
         except Exception as exc:

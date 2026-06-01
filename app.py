@@ -220,8 +220,11 @@ class App(tk.Tk):
             return
 
         custom = self._name_var.get().strip()
-        out_name = (custom if custom.lower().endswith(".docx") else custom + ".docx") \
-                   if custom else self._selected_file.name
+        if custom:
+            out_name = custom if custom.lower().endswith(".docx") else custom + ".docx"
+        else:
+            # Default: Test.docx → Test_filtered.docx
+            out_name = self._selected_file.stem + "_filtered" + self._selected_file.suffix
         dst = OUTPUT_DIR / out_name
 
         self._go_btn.set_state(False, "Processing...")
