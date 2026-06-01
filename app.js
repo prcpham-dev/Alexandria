@@ -11,11 +11,11 @@ const TIMESTAMP_PAT = [
   '\\d+\\s+seconds?',
 ].join('|');
 
-const RX_STRIP_BRACKETS  = /\[.*?\]/g;
+const RX_STRIP_BRACKETS = /\[.*?\]/g;
 const RX_STRIP_TS_PREFIX = new RegExp('^(?:' + TIMESTAMP_PAT + ')\\s+');
-const RX_SKIP_LINE       = new RegExp('^(?:' + TIMESTAMP_PAT + '|sync\\s+to\\s+video\\s+time)\\s*$', 'i');
-const RX_STRIP_PREFIX    = /^(?:\d+[.)]\s+|-\s+|\*\s+|•\s+)/;
-const RX_STRIP_TRAILING  = /\s*sync\s+to\s+video\s+time\s*$/i;
+const RX_SKIP_LINE = new RegExp('^(?:' + TIMESTAMP_PAT + '|sync\\s+to\\s+video\\s+time)\\s*$', 'i');
+const RX_STRIP_PREFIX = /^(?:\d+[.)]\s+|-\s+|\*\s+|•\s+)/;
+const RX_STRIP_TRAILING = /\s*sync\s+to\s+video\s+time\s*$/i;
 
 function stripPrefix(text) {
   text = text.replace(RX_STRIP_BRACKETS, '').trim();
@@ -40,7 +40,7 @@ function processParagraphs(rawLines) {
     if (!stripped) continue;
     if (RX_SKIP_LINE.test(stripped)) { afterTimestamp = true; continue; }
 
-    const hadBrackets  = /\[.*?\]/.test(stripped);
+    const hadBrackets = /\[.*?\]/.test(stripped);
     const hadTimestamp = RX_STRIP_TS_PREFIX.test(stripped);
     const text = stripPrefix(stripped);
 
@@ -57,8 +57,8 @@ function processParagraphs(rawLines) {
     const forceNew = (afterTimestamp || hadBrackets) && !isNextLower;
 
     const shouldJoin = !forceNew && out.length > 0 && (
-      joinNext      ||
-      hadTimestamp  ||
+      joinNext ||
+      hadTimestamp ||
       isNextLower
     );
 
@@ -107,7 +107,7 @@ function buildDocXml(paragraphs, sectPrXml) {
 }
 
 async function processDocx(file) {
-  const zip    = await JSZip.loadAsync(await file.arrayBuffer());
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
   const xmlStr = await zip.file('word/document.xml').async('string');
   const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
 
@@ -115,15 +115,15 @@ async function processDocx(file) {
     .map(paraText)
     .filter(t => t.trim());
 
-  const sectPrEl  = xmlDoc.getElementsByTagNameNS(WNS, 'sectPr')[0];
+  const sectPrEl = xmlDoc.getElementsByTagNameNS(WNS, 'sectPr')[0];
   const sectPrXml = sectPrEl ? new XMLSerializer().serializeToString(sectPrEl) : '';
 
   const cleaned = processParagraphs(rawLines);
   zip.file('word/document.xml', buildDocXml(cleaned, sectPrXml));
 
-  const bytes   = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+  const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
   const docx_b64 = btoa(Array.from(bytes, b => String.fromCharCode(b)).join(''));
-  const filename  = file.name.replace(/\.docx$/i, '_cleaned.docx');
+  const filename = file.name.replace(/\.docx$/i, '_cleaned.docx');
 
   return { paragraphs: cleaned, docx_b64, filename };
 }
@@ -143,21 +143,21 @@ const slots = Array.from({ length: SLOT_COUNT }, (_, i) => ({
 
 let activePreviewSlot = null;
 
-const dropZone        = document.getElementById('dropZone');
-const fileInput       = document.getElementById('fileInput');
-const previewSection  = document.getElementById('previewSection');
-const previewMeta     = document.getElementById('previewMeta');
-const previewBody     = document.getElementById('previewBody');
-const downloadBtn     = document.getElementById('downloadBtn');
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const previewSection = document.getElementById('previewSection');
+const previewMeta = document.getElementById('previewMeta');
+const previewBody = document.getElementById('previewBody');
+const downloadBtn = document.getElementById('downloadBtn');
 const closePreviewBtn = document.getElementById('closePreviewBtn');
 
 function els(id) {
   return {
-    root:    document.getElementById(`slot-${id}`),
-    name:    document.getElementById(`slot-name-${id}`),
-    mid:     document.getElementById(`slot-mid-${id}`),
+    root: document.getElementById(`slot-${id}`),
+    name: document.getElementById(`slot-name-${id}`),
+    mid: document.getElementById(`slot-mid-${id}`),
     openBtn: document.getElementById(`slot-open-${id}`),
-    dlBtn:   document.getElementById(`slot-dl-${id}`),
+    dlBtn: document.getElementById(`slot-dl-${id}`),
   };
 }
 
@@ -170,13 +170,13 @@ function render(id) {
 
   const statusHTML = {
     processing: '<span class="slot-spinner"></span><span class="slot-status-text">Processing…</span>',
-    done:       '<span class="slot-done-icon">✓</span>',
-    error:      `<span class="slot-error-icon">!</span><span class="slot-status-text slot-error-text" title="${slot.error}">${slot.error}</span>`,
+    done: '<span class="slot-done-icon">✓</span>',
+    error: `<span class="slot-error-icon">!</span><span class="slot-status-text slot-error-text" title="${slot.error}">${slot.error}</span>`,
   };
   e.mid.innerHTML = statusHTML[slot.state] ?? '';
 
   e.openBtn.hidden = slot.state !== 'done';
-  e.dlBtn.hidden   = slot.state !== 'done';
+  e.dlBtn.hidden = slot.state !== 'done';
 }
 
 function findTargetSlot() {
@@ -219,7 +219,7 @@ async function processSlot(id) {
 
   try {
     slot.result = await processDocx(slot.file);
-    slot.state  = 'done';
+    slot.state = 'done';
   } catch (err) {
     slot.error = err.message;
     slot.state = 'error';
@@ -251,7 +251,7 @@ function renderPreview() {
     activePreviewSlot = doneSlots[0].id;
   }
 
-  const active   = slots[activePreviewSlot];
+  const active = slots[activePreviewSlot];
   const realPara = active.result.paragraphs.filter(p => p.trim() !== '');
   previewMeta.textContent = `${realPara.length} paragraph${realPara.length !== 1 ? 's' : ''} · ${active.file.name}`;
 
@@ -270,11 +270,11 @@ function downloadSlot(id) {
   const slot = slots[id];
   if (!slot.result) return;
   const bytes = Uint8Array.from(atob(slot.result.docx_b64), c => c.charCodeAt(0));
-  const blob  = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-  const url   = URL.createObjectURL(blob);
-  const a     = document.createElement('a');
-  a.href      = url;
-  a.download  = slot.result.filename;
+  const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = slot.result.filename;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -286,7 +286,7 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
-dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
@@ -310,5 +310,5 @@ for (let i = 0; i < SLOT_COUNT; i++) {
   const id = i;
   const e = els(id);
   e.openBtn.addEventListener('click', () => openSlot(id));
-  e.dlBtn.addEventListener('click',   () => downloadSlot(id));
+  e.dlBtn.addEventListener('click', () => downloadSlot(id));
 }
