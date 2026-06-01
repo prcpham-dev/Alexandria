@@ -1,23 +1,31 @@
-# Alexandria
+# Doc Cleaner
 
-Removes line numbers and timestamps from Word documents, and merges/splits paragraphs based on capitalisation. (For mom)
+A simple web app that cleans up Word documents exported from transcript tools.
 
-## Download
-Go to the **[Releases page](../../releases/latest)** and download the file for your computer:
+Upload a `.docx` file → timestamps and time labels are removed → preview the result → download the cleaned file.
 
-| Your computer | Download |
+## What it removes
+
+Lines that are **only** a timestamp or duration are deleted:
+
+| Example | Removed? |
 |---|---|
-| **Windows** | `Alexandria.exe` |
-| **Mac** | `Alexandria-Mac.zip` |
+| `13:45` | ✅ Yes |
+| `1:23:45` | ✅ Yes |
+| `5 minutes, 30 seconds` | ✅ Yes |
+| `2 hours, 1 minute, 5 seconds` | ✅ Yes |
+| `She arrived at 13:45` | ❌ No — kept as-is |
 
+Paragraphs are also joined/split based on capitalisation (lowercase continuation → joined to previous paragraph).
 
+## Project structure
 
-## How to use
-**Windows**
-1. Download `Alexandria.exe`
-2. Double-click it — the window opens
-
-**Mac**
-1. Download `Alexandria-Mac.zip` and extract it
-2. Double-click `Alexandria.app`
-3. First time only: if Mac blocks it, right-click → **Open** → **Open**
+```
+├── index.html        Web page
+├── style.css         Styles
+├── app.js            Frontend logic
+├── api/
+│   └── process.py    Vercel serverless function
+├── requirements.txt  Python dependency (python-docx)
+└── vercel.json       Vercel config
+```

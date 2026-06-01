@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doc Cleaner</title>
+  <meta name="description" content="Upload a Word document and get a cleaned version with timestamps and time labels removed." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <h1>📄 Doc Cleaner</h1>
+    <p>Upload a Word document — timestamps and time labels are removed, paragraphs are cleaned up automatically.</p>
+  </header>
+
+  <main class="card">
+
+    <!-- Upload section -->
+    <section id="uploadSection">
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".docx" />
+        <span class="drop-icon">📂</span>
+        <div class="label">Drop your .docx file here</div>
+        <div class="sublabel">or tap to browse</div>
+      </div>
+
+      <div class="file-chip" id="fileChip">
+        <span>📄</span>
+        <span class="name" id="fileName"></span>
+        <button class="remove" id="removeFile" title="Remove file">✕</button>
+      </div>
+
+      <button class="btn" id="processBtn" disabled>
+        ✨ Clean Document
+      </button>
+
+      <div class="status" id="status"></div>
+
+      <div class="info">
+        <div class="info-title">Lines that get removed</div>
+        <div class="tag-list">
+          <span class="tag">13:45</span>
+          <span class="tag">1:23:45</span>
+          <span class="tag">5 minutes, 30 seconds</span>
+          <span class="tag">2 hours, 1 minute, 5 seconds</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preview section (hidden until processed) -->
+    <section id="previewSection" hidden>
+      <div class="preview-header">
+        <div class="preview-meta" id="previewMeta"></div>
+        <div class="preview-actions">
+          <button class="btn-ghost" id="backBtn">← New file</button>
+          <button class="btn" id="downloadBtn">⬇ Download .docx</button>
+        </div>
+      </div>
+      <div class="preview-body" id="previewBody"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">Files are processed instantly and never stored.</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
