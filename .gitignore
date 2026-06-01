@@ -13,7 +13,6 @@ dist/
 
 # macOS
 .DS_Store
-*.command
 
 # Input/output folders (user data, not code)
 input/
