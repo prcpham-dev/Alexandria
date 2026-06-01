@@ -36,21 +36,27 @@ function isLower(ch) {
 function processParagraphs(rawLines) {
   const out = [];
   let joinNext = false;
+  let afterTimestamp = false;
 
   for (const raw of rawLines) {
     const stripped = raw.trim();
-    if (!stripped || RX_SKIP_LINE.test(stripped)) continue;
+    if (!stripped) continue;
+    if (RX_SKIP_LINE.test(stripped)) { afterTimestamp = true; continue; }
 
     const hadTimestamp = RX_STRIP_TS_PREFIX.test(stripped);
     const text = stripPrefix(stripped);
 
     if (!text) {
       if (stripped) joinNext = true;
+      afterTimestamp = false;
       continue;
     }
 
     const fc = text[0];
-    if (out.length > 0 && (joinNext || hadTimestamp || isLower(fc) || /^\d/.test(fc))) {
+    const prevEndsWithPunct = out.length > 0 && '.!?…'.includes(out[out.length - 1].at(-1));
+    const forceNew = afterTimestamp && prevEndsWithPunct;
+
+    if (!forceNew && out.length > 0 && (joinNext || hadTimestamp || isLower(fc) || /^\d/.test(fc))) {
       out[out.length - 1] = out[out.length - 1].trimEnd() + ' ' + text;
     } else {
       if (out.length > 0) {
@@ -60,6 +66,7 @@ function processParagraphs(rawLines) {
       out.push(text);
     }
     joinNext = false;
+    afterTimestamp = false;
   }
 
   if (out.length > 0 && out.at(-1)) {
