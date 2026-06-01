@@ -202,17 +202,17 @@ body {
 
 .btn-ghost-purple {
   background: none;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--error);
   border-radius: 8px;
   padding: 8px 14px;
-  color: var(--accent2);
+  color: var(--error);
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 .btn-ghost-purple:hover {
-  background: rgba(108, 99, 255, 0.12);
+  background: rgba(248, 113, 113, 0.12);
 }
 
 .status {
