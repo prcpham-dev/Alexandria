@@ -1,9 +1,3 @@
-"""
-app.py – Alexandria
-====================
-Transcript cleaner: removes line numbers & timestamps, merges/splits paragraphs.
-"""
-
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from pathlib import Path
@@ -17,7 +11,6 @@ from filter import process_docx
 
 BASE_DIR = Path(__file__).parent
 
-# Save to Desktop when running as frozen bundle; ./output/ in dev mode.
 if getattr(sys, "frozen", False):
     OUTPUT_DIR = Path.home() / "Desktop" / "Alexandria Output"
 else:
@@ -25,7 +18,6 @@ else:
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# ── Colour palette ─────────────────────────────────────────────────────────────
 BG          = "#1e1e2e"
 SURFACE     = "#2a2a3e"
 ACCENT      = "#a78bfa"
@@ -34,16 +26,16 @@ TEXT        = "#e2e8f0"
 TEXT_DIM    = "#94a3b8"
 SUCCESS     = "#34d399"
 ERROR_CLR   = "#f87171"
-BTN_BROWSE  = "#3d3d5c"   # distinct dark-slate for Browse button
+BTN_BROWSE  = "#3d3d5c"
 
-
-# ── Reliable custom button (Frame + Label) ─────────────────────────────────────
-# tk.Button on macOS ignores bg colour when relief="flat".
-# Using a Frame+Label gives us full colour control on every platform.
 
 class FlatButton(tk.Frame):
-    """A Frame+Label that acts as a fully custom-coloured button."""
-
+    """A Frame+Label that acts as a fully custom-coloured button.
+    
+    tk.Button on macOS ignores the bg colour when relief='flat'.
+    This class uses a Frame and Label instead, giving full colour
+    control on every platform.
+    """
     def __init__(self, parent, text, command,
                  bg=ACCENT_DARK, fg=TEXT, font_size=11, big=False):
         super().__init__(parent, bg=bg, cursor="hand2")
@@ -64,9 +56,8 @@ class FlatButton(tk.Frame):
             w.bind("<Enter>",    self._on_enter)
             w.bind("<Leave>",    self._on_leave)
 
-    # ── state helpers ──────────────────────────────────────────────────────────
-
     def set_state(self, enabled: bool, text: str | None = None):
+        """Enable or disable the button, and optionally update its label."""
         self._enabled = enabled
         if text:
             self._lbl.config(text=text)
@@ -75,8 +66,6 @@ class FlatButton(tk.Frame):
         self.config(bg=bg)
         self._lbl.config(bg=bg, fg=fg)
         self.config(cursor="hand2" if enabled else "arrow")
-
-    # ── event handlers ─────────────────────────────────────────────────────────
 
     def _on_click(self, _=None):
         if self._enabled:
@@ -94,9 +83,8 @@ class FlatButton(tk.Frame):
         self._lbl.config(bg=color)
 
 
-# ── Main application ───────────────────────────────────────────────────────────
-
 class App(tk.Tk):
+    """Main application window for Alexandria."""
     def __init__(self):
         super().__init__()
         self.title("Alexandria")
@@ -111,10 +99,7 @@ class App(tk.Tk):
         self._selected_file: Path | None = None
         self._build_ui()
 
-    # ── UI ─────────────────────────────────────────────────────────────────────
-
     def _build_ui(self):
-        # Header
         hdr = tk.Frame(self, bg=ACCENT_DARK, pady=18)
         hdr.pack(fill="x")
         tk.Label(hdr, text="Alexandria",
@@ -127,7 +112,6 @@ class App(tk.Tk):
         body = tk.Frame(self, bg=BG, padx=34, pady=20)
         body.pack(fill="both", expand=True)
 
-        # Step 1
         self._section(body, "Step 1  ·  Choose your Word document (.docx)")
         file_row = tk.Frame(body, bg=BG)
         file_row.pack(fill="x", pady=(6, 0))
@@ -146,7 +130,6 @@ class App(tk.Tk):
         FlatButton(file_row, "Browse...", self._pick_file,
                    bg=BTN_BROWSE).pack(side="right")
 
-        # Step 2
         self._section(body, "Step 2  ·  Output file name  (optional)")
         tk.Label(body, text="Leave blank to keep the original file name.",
                  font=("Helvetica", 10), bg=BG, fg=TEXT_DIM).pack(anchor="w")
@@ -170,13 +153,11 @@ class App(tk.Tk):
                  font=("Helvetica", 10), bg=BG, fg=TEXT_DIM
                  ).pack(anchor="w", pady=(2, 0))
 
-        # Step 3
         self._section(body, "Step 3  ·  Clean!")
         self._go_btn = FlatButton(body, "Clean Document", self._run,
                                   bg=ACCENT_DARK, font_size=13, big=True)
         self._go_btn.pack(fill="x", pady=(6, 0))
 
-        # Status bar
         self._status_var = tk.StringVar(value="Ready – select a file to begin.")
         self._status_lbl = tk.Label(
             self, textvariable=self._status_var,
@@ -187,6 +168,7 @@ class App(tk.Tk):
         self._status_lbl.pack(fill="x", side="bottom", ipady=10)
 
     def _section(self, parent, text):
+        """Render a labelled section header with an accent underline."""
         f = tk.Frame(parent, bg=BG)
         f.pack(fill="x", pady=(18, 4))
         tk.Label(f, text=text,
@@ -194,9 +176,8 @@ class App(tk.Tk):
                  bg=BG, fg=ACCENT).pack(anchor="w")
         tk.Frame(f, bg=ACCENT, height=1).pack(fill="x", pady=(4, 0))
 
-    # ── Actions ────────────────────────────────────────────────────────────────
-
     def _pick_file(self):
+        """Open a file dialog and store the selected .docx path."""
         path = filedialog.askopenfilename(
             title="Select a Word document",
             filetypes=[("Word documents", "*.docx"), ("All files", "*.*")],
@@ -211,6 +192,7 @@ class App(tk.Tk):
         self._status(f"Selected: {self._selected_file.name}", TEXT_DIM)
 
     def _run(self):
+        """Validate the selection, then process the document in a background thread."""
         if not self._selected_file or not self._selected_file.exists():
             self._status("Please choose a .docx file first.", ERROR_CLR)
             messagebox.showwarning(
@@ -223,7 +205,6 @@ class App(tk.Tk):
         if custom:
             out_name = custom if custom.lower().endswith(".docx") else custom + ".docx"
         else:
-            # Default: Test.docx → Test_filtered.docx
             out_name = self._selected_file.stem + "_filtered" + self._selected_file.suffix
         dst = OUTPUT_DIR / out_name
 
@@ -241,7 +222,7 @@ class App(tk.Tk):
 
     @staticmethod
     def _open_output(dst: Path):
-        """Open the output folder in the OS file manager, highlighting the file."""
+        """Open the output folder in the OS file manager, with the file selected."""
         try:
             system = platform.system()
             if system == "Windows":
@@ -258,11 +239,13 @@ class App(tk.Tk):
                 pass
 
     def _on_success(self, dst: Path):
+        """Called on the main thread after a successful processing run."""
         self._go_btn.set_state(True, "Clean Document")
         self._status(f"Done!  Saved to: {dst.parent.name}/{dst.name}", SUCCESS)
         self._open_output(dst)
 
     def _on_error(self, msg: str):
+        """Called on the main thread when processing raises an exception."""
         self._go_btn.set_state(True, "Clean Document")
         self._status(f"Error: {msg}", ERROR_CLR)
         messagebox.showerror("Something went wrong", f"Error:\n{msg}")

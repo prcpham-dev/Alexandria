@@ -1,24 +1,3 @@
-"""
-filter.py – Doc Number Filter
-==============================
-Reads every .docx file from the "input" folder, strips line numbers and
-timestamps, merges continuation lines (lower-case first letter) with the
-previous paragraph, and saves the cleaned document to the "output" folder.
-
-Rules applied:
-  1. Strip leading numbers / timestamps at the beginning of each line.
-     Patterns removed:
-       • "1.", "12.", "123." …           (numbered list)
-       • "1)", "12)" …                   (numbered list variant)
-       • "[1]", "[12]" …                 (bracketed numbers)
-       • "00:00", "00:00:00", "1:23:45"  (timestamps)
-       • Any combination of the above at the start of a line
-  2. After stripping, if the remaining text starts with a LOWER-CASE letter
-     → join it to the previous paragraph (continuation).
-  3. If it starts with an UPPER-CASE letter (or is a fresh first paragraph)
-     → treat it as a new paragraph.
-"""
-
 import re
 import os
 from pathlib import Path
@@ -27,32 +6,27 @@ from docx.shared import Pt
 from copy import deepcopy
 import copy
 
-# ── Folder paths (relative to this script) ───────────────────────────────────
 BASE_DIR   = Path(__file__).parent
 INPUT_DIR  = BASE_DIR / "input"
 OUTPUT_DIR = BASE_DIR / "output"
 
-# ── Regex: strip leading numbers / timestamps ─────────────────────────────────
-# Matches prefixes like: "1. ", "2) ", "[3] ", "00:12 ", "1:23:45 ", and combos
 _STRIP_PREFIX = re.compile(
     r"^"
     r"(?:"
-        r"(?:\[?\d+\]?[\.\):\-]?\s*)"        # number: 1. / 1) / [1] / 1:
+        r"(?:\[?\d+\]?[\.\):\-]?\s*)"
         r"|"
-        r"(?:\d{1,2}:\d{2}(?::\d{2})?\s*)"   # timestamp: 00:00 / 00:00:00
+        r"(?:\d{1,2}:\d{2}(?::\d{2})?\s*)"
     r")+"
 )
 
-# ── Regex: skip the entire line ───────────────────────────────────────────────
-# Whole lines that are pure timestamps / time labels and carry no content.
 _SKIP_LINE = re.compile(
     r"^"
     r"(?:"
-        r"\d{1,2}:\d{2}(?::\d{2})?"              # 13:38  or  1:23:45
+        r"\d{1,2}:\d{2}(?::\d{2})?"
         r"|"
-        r"\d+\s+minutes?,\s*\d+\s+seconds?"      # 13 minutes, 38 seconds
+        r"\d+\s+minutes?,\s*\d+\s+seconds?"
         r"|"
-        r"\d+\s+hours?,\s*\d+\s+minutes?,\s*\d+\s+seconds?"  # 1 hour, 2 minutes, 3 seconds
+        r"\d+\s+hours?,\s*\d+\s+minutes?,\s*\d+\s+seconds?"
     r")\s*$"
 )
 
@@ -64,53 +38,46 @@ def strip_prefix(text: str) -> str:
 
 def process_paragraphs(raw_lines: list[str]) -> list[str]:
     """
-    Apply the merge/split logic:
-      - Lines that are pure timestamps / time labels  → skipped entirely
-      - lower-case first char  → append to previous paragraph (continuation)
-      - upper-case first char  → new paragraph (blank line separator added)
-    Returns a list of strings; empty strings represent blank lines.
+    Apply the merge/split logic to a list of raw text lines:
+      - Lines that are pure timestamps or time labels are skipped entirely.
+      - A line starting with a lowercase letter is joined to the previous paragraph.
+      - A line starting with an uppercase letter starts a new paragraph,
+        with a blank line inserted before it as a separator.
+    Returns a list of strings where empty strings represent blank lines.
     """
     paragraphs: list[str] = []
 
     for raw in raw_lines:
-        # Drop lines that are entirely a timestamp / time label
         if _SKIP_LINE.match(raw.strip()):
             continue
 
         text = strip_prefix(raw).strip()
 
-        # Skip completely empty lines after stripping
         if not text:
             continue
 
         first_char = text[0]
 
         if paragraphs and first_char.islower():
-            # Continuation – join to previous paragraph with a space
             paragraphs[-1] = paragraphs[-1].rstrip() + " " + text
         else:
-            # New paragraph starting with uppercase (or very first paragraph)
-            # Insert a blank line separator before it (except at the very start)
             if paragraphs:
-                paragraphs.append("")   # blank line between paragraphs
+                paragraphs.append("")
             paragraphs.append(text)
 
     return paragraphs
 
 
 def process_docx(src_path: Path, dst_path: Path) -> None:
-    """Read src_path .docx, process, write to dst_path."""
+    """Read a .docx file, run it through the filter, and save the result."""
     doc = Document(src_path)
 
-    # Collect all non-empty paragraph texts
     raw_lines = [p.text for p in doc.paragraphs if p.text.strip()]
 
     cleaned = process_paragraphs(raw_lines)
 
-    # Build a new document
     new_doc = Document()
 
-    # Copy core styles / default font from original if possible
     try:
         style = doc.styles["Normal"]
         new_style = new_doc.styles["Normal"]
@@ -123,10 +90,11 @@ def process_docx(src_path: Path, dst_path: Path) -> None:
         new_doc.add_paragraph(para_text)
 
     new_doc.save(dst_path)
-    print(f"  ✓  {src_path.name}  →  {dst_path.name}")
+    print(f"  done  {src_path.name}  ->  {dst_path.name}")
 
 
 def main():
+    """CLI entry point: process all .docx files found in the input folder."""
     INPUT_DIR.mkdir(exist_ok=True)
     OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -134,7 +102,7 @@ def main():
 
     if not docx_files:
         print("No .docx files found in the 'input' folder.")
-        print(f"  → Put your Word documents in: {INPUT_DIR}")
+        print(f"  -> Put your Word documents in: {INPUT_DIR}")
         return
 
     print(f"Found {len(docx_files)} file(s) to process...\n")
@@ -144,7 +112,7 @@ def main():
         try:
             process_docx(src, dst)
         except Exception as exc:
-            print(f"  ✗  {src.name}  ERROR: {exc}")
+            print(f"  error  {src.name}: {exc}")
 
     print(f"\nDone! Cleaned files are in: {OUTPUT_DIR}")
 
