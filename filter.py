@@ -32,7 +32,9 @@ _SKIP_LINE = re.compile(
 
 
 def strip_prefix(text: str) -> str:
-    """Remove leading number / timestamp prefixes from a line of text."""
+    """
+    Remove leading number / timestamp prefixes from a line of text.
+    """
     return _STRIP_PREFIX.sub("", text).strip()
 
 
@@ -69,13 +71,12 @@ def process_paragraphs(raw_lines: list[str]) -> list[str]:
 
 
 def process_docx(src_path: Path, dst_path: Path) -> None:
-    """Read a .docx file, run it through the filter, and save the result."""
+    """
+    Read a .docx file, run it through the filter, and save the result.
+    """
     doc = Document(src_path)
-
     raw_lines = [p.text for p in doc.paragraphs if p.text.strip()]
-
     cleaned = process_paragraphs(raw_lines)
-
     new_doc = Document()
 
     try:
@@ -94,7 +95,9 @@ def process_docx(src_path: Path, dst_path: Path) -> None:
 
 
 def main():
-    """CLI entry point: process all .docx files found in the input folder."""
+    """
+    CLI entry point: process all .docx files found in the input folder.
+    """
     INPUT_DIR.mkdir(exist_ok=True)
     OUTPUT_DIR.mkdir(exist_ok=True)
 
