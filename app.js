@@ -11,23 +11,23 @@ const slots = Array.from({ length: SLOT_COUNT }, (_, i) => ({
 
 let activePreviewSlot = null;
 
-const dropZone        = document.getElementById('dropZone');
-const fileInput       = document.getElementById('fileInput');
-const previewSection  = document.getElementById('previewSection');
-const previewTabs     = document.getElementById('previewTabs');
-const previewMeta     = document.getElementById('previewMeta');
-const previewBody     = document.getElementById('previewBody');
-const downloadBtn     = document.getElementById('downloadBtn');
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const previewSection = document.getElementById('previewSection');
+const previewTabs = document.getElementById('previewTabs');
+const previewMeta = document.getElementById('previewMeta');
+const previewBody = document.getElementById('previewBody');
+const downloadBtn = document.getElementById('downloadBtn');
 const closePreviewBtn = document.getElementById('closePreviewBtn');
 
 function els(id) {
   return {
-    root:      document.getElementById(`slot-${id}`),
-    name:      document.getElementById(`slot-name-${id}`),
-    mid:       document.getElementById(`slot-mid-${id}`),
-    clearBtn:  document.getElementById(`slot-clear-${id}`),
-    openBtn:   document.getElementById(`slot-open-${id}`),
-    dlBtn:     document.getElementById(`slot-dl-${id}`),
+    root: document.getElementById(`slot-${id}`),
+    name: document.getElementById(`slot-name-${id}`),
+    mid: document.getElementById(`slot-mid-${id}`),
+    clearBtn: document.getElementById(`slot-clear-${id}`),
+    openBtn: document.getElementById(`slot-open-${id}`),
+    dlBtn: document.getElementById(`slot-dl-${id}`),
   };
 }
 
@@ -36,18 +36,18 @@ function render(id) {
   const e = els(id);
 
   e.root.dataset.state = slot.state;
-  e.name.textContent   = slot.file ? slot.file.name : '—';
+  e.name.textContent = slot.file ? slot.file.name : '—';
 
   const statusHTML = {
     processing: '<span class="slot-spinner"></span><span class="slot-status-text">Processing…</span>',
-    done:       '<span class="slot-done-icon">✓</span><span class="slot-status-text">Done</span>',
-    error:      `<span class="slot-error-icon">!</span><span class="slot-status-text slot-error-text" title="${slot.error}">${slot.error}</span>`,
+    done: '<span class="slot-done-icon">✓</span>',
+    error: `<span class="slot-error-icon">!</span><span class="slot-status-text slot-error-text" title="${slot.error}">${slot.error}</span>`,
   };
   e.mid.innerHTML = statusHTML[slot.state] ?? '';
 
-  e.clearBtn.hidden = slot.state === 'idle' || slot.state === 'processing';
-  e.openBtn.hidden  = slot.state !== 'done';
-  e.dlBtn.hidden    = slot.state !== 'done';
+  e.clearBtn.hidden = slot.state === 'idle' || slot.state === 'processing' || slot.state === 'done';
+  e.openBtn.hidden = slot.state !== 'done';
+  e.dlBtn.hidden = slot.state !== 'done';
 }
 
 function findTargetSlot() {
@@ -69,11 +69,11 @@ function assignFile(file) {
     renderPreview();
   }
 
-  slots[id].file    = file;
+  slots[id].file = file;
   slots[id].addedAt = Date.now();
-  slots[id].state   = 'idle';
-  slots[id].result  = null;
-  slots[id].error   = null;
+  slots[id].state = 'idle';
+  slots[id].result = null;
+  slots[id].error = null;
   render(id);
 
   processSlot(id);
@@ -97,11 +97,11 @@ async function processSlot(id) {
   form.append('file', slot.file);
 
   try {
-    const res  = await fetch('/api/process', { method: 'POST', body: form });
+    const res = await fetch('/api/process', { method: 'POST', body: form });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
     slot.result = data;
-    slot.state  = 'done';
+    slot.state = 'done';
   } catch (err) {
     slot.error = err.message;
     slot.state = 'error';
@@ -134,17 +134,7 @@ function renderPreview() {
     activePreviewSlot = doneSlots[0].id;
   }
 
-  previewTabs.innerHTML = '';
-  doneSlots.forEach(slot => {
-    const tab = document.createElement('button');
-    tab.className = 'preview-tab' + (slot.id === activePreviewSlot ? ' active' : '');
-    tab.textContent = slot.file.name.replace(/\.docx$/i, '');
-    tab.title = slot.file.name;
-    tab.onclick = () => { activePreviewSlot = slot.id; renderPreview(); };
-    previewTabs.appendChild(tab);
-  });
-
-  const active   = slots[activePreviewSlot];
+  const active = slots[activePreviewSlot];
   const realPara = active.result.paragraphs.filter(p => p.trim() !== '');
   previewMeta.textContent = `${realPara.length} paragraph${realPara.length !== 1 ? 's' : ''} · ${active.file.name}`;
 
@@ -163,11 +153,11 @@ function downloadSlot(id) {
   const slot = slots[id];
   if (!slot.result) return;
   const bytes = Uint8Array.from(atob(slot.result.docx_b64), c => c.charCodeAt(0));
-  const blob  = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-  const url   = URL.createObjectURL(blob);
-  const a     = document.createElement('a');
-  a.href      = url;
-  a.download  = slot.result.filename;
+  const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = slot.result.filename;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -177,8 +167,8 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
-dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   dropZone.classList.remove('drag-over');
@@ -191,14 +181,16 @@ downloadBtn.addEventListener('click', () => {
 });
 
 closePreviewBtn.addEventListener('click', () => {
-  previewSection.hidden = true;
+  const id = activePreviewSlot;
   activePreviewSlot = null;
+  previewSection.hidden = true;
+  if (id !== null) clearSlot(id);
 });
 
 for (let i = 0; i < SLOT_COUNT; i++) {
   const id = i;
-  const e  = els(id);
+  const e = els(id);
   e.clearBtn.addEventListener('click', () => clearSlot(id));
-  e.openBtn.addEventListener('click',  () => openSlot(id));
-  e.dlBtn.addEventListener('click',    () => downloadSlot(id));
+  e.openBtn.addEventListener('click', () => openSlot(id));
+  e.dlBtn.addEventListener('click', () => downloadSlot(id));
 }

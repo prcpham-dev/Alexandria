@@ -200,6 +200,21 @@ body {
   color: var(--accent2);
 }
 
+.btn-ghost-purple {
+  background: none;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: var(--accent2);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-ghost-purple:hover {
+  background: rgba(108, 99, 255, 0.12);
+}
+
 .status {
   margin-top: 14px;
   font-size: 0.875rem;
