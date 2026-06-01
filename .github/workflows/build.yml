@@ -47,6 +47,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install tk for macOS
+        run: brew install python-tk@3.11
+
       - name: Install dependencies
         run: pip install pyinstaller python-docx
 
@@ -56,6 +59,7 @@ jobs:
           --windowed
           --name Alexandria
           --hidden-import filter
+          --collect-submodules tkinter
           app.py
 
       - name: Zip the .app
