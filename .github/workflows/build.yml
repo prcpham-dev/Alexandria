@@ -31,10 +31,22 @@ jobs:
           --hidden-import filter
           app.py
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Windows build to release
+        uses: softprops/action-gh-release@v1
         with:
-          name: windows-build
-          path: dist/Alexandria.exe
+          files: dist/Alexandria.exe
+          body: |
+            ## Download Alexandria
+
+            | Your computer | Download |
+            |---|---|
+            | **Windows** | `Alexandria.exe` – just double-click, no install needed |
+            | **Mac** | `Alexandria-Mac.zip` – extract, then double-click `Alexandria.app` *(uploading…)* |
+
+            > **Mac tip:** If macOS blocks the app the first time, right-click it → Open → Open.
+
+            ---
+            Cleaned files are saved to your Desktop in a folder called **Alexandria Output**.
 
   # ── macOS .app ──────────────────────────────────────────────────────────────
   # macos-13 = Intel runner → works on both Intel and Apple Silicon (via Rosetta)
@@ -65,32 +77,7 @@ jobs:
       - name: Zip the .app
         run: cd dist && zip -r Alexandria-Mac.zip Alexandria.app
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Mac build to release
+        uses: softprops/action-gh-release@v1
         with:
-          name: mac-build
-          path: dist/Alexandria-Mac.zip
-
-  # ── Create GitHub Release with both files ───────────────────────────────────
-  release:
-    needs: [build-windows, build-macos]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-
-      - uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            windows-build/Alexandria.exe
-            mac-build/Alexandria-Mac.zip
-          body: |
-            ## Download Alexandria
-
-            | Your computer | Download |
-            |---|---|
-            | **Windows** | `Alexandria.exe` – just double-click, no install needed |
-            | **Mac** | `Alexandria-Mac.zip` – extract, then double-click `Alexandria.app` |
-
-            > **Mac tip:** If macOS blocks the app the first time, right-click it → Open → Open.
-
-            ---
-            Cleaned files are saved to your Desktop in a folder called **Alexandria Output**.
+          files: dist/Alexandria-Mac.zip
