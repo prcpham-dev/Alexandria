@@ -163,8 +163,8 @@ body {
 }
 
 .btn:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: scale(1.02);
+  opacity: 0.88;
+  transform: scale(1.05);
 }
 
 .btn:disabled {
@@ -196,9 +196,8 @@ body {
 }
 
 .btn-ghost:hover {
-  border-color: var(--accent2);
-  color: var(--accent2);
-  transform: scale(1.02);
+  opacity: 0.88;
+  transform: scale(1.05);
 }
 
 .btn-ghost-purple {
@@ -213,9 +212,8 @@ body {
   transition: background 0.15s, color 0.15s, transform 0.15s;
 }
 .btn-ghost-purple:hover {
-  background: var(--error);
-  color: #fff;
-  transform: scale(1.02);
+  opacity: 0.88;
+  transform: scale(1.05);
 }
 
 .status {
