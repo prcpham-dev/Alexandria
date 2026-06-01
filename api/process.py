@@ -1,9 +1,3 @@
-"""
-Vercel Python serverless function.
-Accepts a .docx upload, filters it, returns JSON with:
-  - paragraphs: list of cleaned paragraph strings (for in-page preview)
-  - docx_b64:   base64-encoded .docx file (for download)
-"""
 from http.server import BaseHTTPRequestHandler
 import cgi
 import io
@@ -42,32 +36,38 @@ _TIMESTAMP = re.compile(
     r")"
 )
 
-_SKIP_LINE   = re.compile(_TIMESTAMP.pattern + r"\s*$")
+_SKIP_LINE              = re.compile(_TIMESTAMP.pattern + r"\s*$")
 _STRIP_TIMESTAMP_PREFIX = re.compile(_TIMESTAMP.pattern + r"\s+")
-
-_STANDALONE_NUMBER = re.compile(r"^\d+\s*$")
-
+_STRIP_TRAILING         = re.compile(r"\s*sync\s+to\s+video\s+time\s*$", re.IGNORECASE)
+_STRIP_BRACKETS         = re.compile(r"\[.*?\]")
 
 def strip_prefix(text: str) -> str:
+    text = _STRIP_BRACKETS.sub("", text)
     text = _STRIP_TIMESTAMP_PREFIX.sub("", text)
-    return _STRIP_PREFIX.sub("", text).strip()
+    text = _STRIP_PREFIX.sub("", text)
+    text = _STRIP_TRAILING.sub("", text)
+    return text.strip()
 
 
 def process_paragraphs(raw_lines: list) -> list:
     paragraphs = []
+    join_next = False
     for raw in raw_lines:
         if _SKIP_LINE.match(raw.strip()):
             continue
         text = strip_prefix(raw).strip()
         if not text:
+            if raw.strip():
+                join_next = True
             continue
         first_char = text[0]
-        if paragraphs and (first_char.islower() or _STANDALONE_NUMBER.match(text)):
+        if paragraphs and (join_next or first_char.islower() or first_char.isdigit()):
             paragraphs[-1] = paragraphs[-1].rstrip() + " " + text
         else:
             if paragraphs:
                 paragraphs.append("")
             paragraphs.append(text)
+        join_next = False
     return paragraphs
 
 
