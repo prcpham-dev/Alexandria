@@ -48,6 +48,16 @@ def strip_prefix(text: str) -> str:
     text = _STRIP_TRAILING.sub("", text)
     return text.strip()
 
+def _last_word_capitalized(text: str) -> bool:
+    words = text.split()
+    return bool(words) and words[-1][0].isupper()
+
+
+def _ensure_period(text: str) -> str:
+    if text and text[-1] not in '.!?…':
+        return text + '.'
+    return text
+
 
 def process_paragraphs(raw_lines: list) -> list:
     paragraphs = []
@@ -61,13 +71,22 @@ def process_paragraphs(raw_lines: list) -> list:
                 join_next = True
             continue
         first_char = text[0]
-        if paragraphs and (join_next or first_char.islower() or first_char.isdigit()):
+        prev = paragraphs[-1] if paragraphs else ""
+        if paragraphs and (
+            join_next
+            or first_char.islower()
+            or first_char.isdigit()
+            or (first_char.isupper() and _last_word_capitalized(prev))
+        ):
             paragraphs[-1] = paragraphs[-1].rstrip() + " " + text
         else:
             if paragraphs:
+                paragraphs[-1] = _ensure_period(paragraphs[-1])
                 paragraphs.append("")
             paragraphs.append(text)
         join_next = False
+    if paragraphs and paragraphs[-1]:
+        paragraphs[-1] = _ensure_period(paragraphs[-1])
     return paragraphs
 
 

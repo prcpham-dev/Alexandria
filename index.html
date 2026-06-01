@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alexandria</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>" />
-  <meta name="description" content="Upload a Word document and get a cleaned version with timestamps and time labels removed." />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>" />
+  <meta name="description"
+    content="Upload a Word document and get a cleaned version with timestamps and time labels removed." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
   <header class="header">
@@ -35,20 +39,8 @@
       </div>
 
       <button class="btn" id="processBtn" disabled>
-        ✨ Clean Document
+        Clean Document
       </button>
-
-      <div class="status" id="status"></div>
-
-      <div class="info">
-        <div class="info-title">Lines that get removed</div>
-        <div class="tag-list">
-          <span class="tag">13:45</span>
-          <span class="tag">1:23:45</span>
-          <span class="tag">5 minutes, 30 seconds</span>
-          <span class="tag">2 hours, 1 minute, 5 seconds</span>
-        </div>
-      </div>
     </section>
 
     <!-- Preview section (hidden until processed) -->
@@ -69,4 +61,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>
