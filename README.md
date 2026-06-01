@@ -1,6 +1,6 @@
 # Alexandria – Transcript Cleaner
 
-Removes line numbers and timestamps from Word documents, and merges/splits paragraphs based on capitalisation.
+Removes line numbers and timestamps from Word documents, and merges/splits paragraphs based on capitalisation. (For mom)
 
 ## Download
 Go to the **[Releases page](../../releases/latest)** and download the file for your computer:
