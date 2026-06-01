@@ -57,7 +57,9 @@ class FlatButton(tk.Frame):
             w.bind("<Leave>",    self._on_leave)
 
     def set_state(self, enabled: bool, text: str | None = None):
-        """Enable or disable the button, and optionally update its label."""
+        """
+        Enable or disable the button, and optionally update its label.
+        """
         self._enabled = enabled
         if text:
             self._lbl.config(text=text)
@@ -84,7 +86,9 @@ class FlatButton(tk.Frame):
 
 
 class App(tk.Tk):
-    """Main application window for Alexandria."""
+    """
+    Main application window for Alexandria.
+    """
     def __init__(self):
         super().__init__()
         self.title("Alexandria")
@@ -168,7 +172,9 @@ class App(tk.Tk):
         self._status_lbl.pack(fill="x", side="bottom", ipady=10)
 
     def _section(self, parent, text):
-        """Render a labelled section header with an accent underline."""
+        """
+        Render a labelled section header with an accent underline.
+        """
         f = tk.Frame(parent, bg=BG)
         f.pack(fill="x", pady=(18, 4))
         tk.Label(f, text=text,
@@ -177,7 +183,9 @@ class App(tk.Tk):
         tk.Frame(f, bg=ACCENT, height=1).pack(fill="x", pady=(4, 0))
 
     def _pick_file(self):
-        """Open a file dialog and store the selected .docx path."""
+        """
+        Open a file dialog and store the selected .docx path.
+        """
         path = filedialog.askopenfilename(
             title="Select a Word document",
             filetypes=[("Word documents", "*.docx"), ("All files", "*.*")],
@@ -192,7 +200,9 @@ class App(tk.Tk):
         self._status(f"Selected: {self._selected_file.name}", TEXT_DIM)
 
     def _run(self):
-        """Validate the selection, then process the document in a background thread."""
+        """
+        Validate the selection, then process the document in a background thread.
+        """
         if not self._selected_file or not self._selected_file.exists():
             self._status("Please choose a .docx file first.", ERROR_CLR)
             messagebox.showwarning(
@@ -222,7 +232,9 @@ class App(tk.Tk):
 
     @staticmethod
     def _open_output(dst: Path):
-        """Open the output folder in the OS file manager, with the file selected."""
+        """
+        Open the output folder in the OS file manager, with the file selected.
+        """
         try:
             system = platform.system()
             if system == "Windows":
@@ -239,13 +251,17 @@ class App(tk.Tk):
                 pass
 
     def _on_success(self, dst: Path):
-        """Called on the main thread after a successful processing run."""
+        """
+        Called on the main thread after a successful processing run.
+        """
         self._go_btn.set_state(True, "Clean Document")
         self._status(f"Done!  Saved to: {dst.parent.name}/{dst.name}", SUCCESS)
         self._open_output(dst)
 
     def _on_error(self, msg: str):
-        """Called on the main thread when processing raises an exception."""
+        """
+        Called on the main thread when processing raises an exception.
+        """
         self._go_btn.set_state(True, "Clean Document")
         self._status(f"Error: {msg}", ERROR_CLR)
         messagebox.showerror("Something went wrong", f"Error:\n{msg}")
