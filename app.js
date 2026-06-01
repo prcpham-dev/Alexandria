@@ -140,12 +140,11 @@ const closePreviewBtn = document.getElementById('closePreviewBtn');
 
 function els(id) {
   return {
-    root:     document.getElementById(`slot-${id}`),
-    name:     document.getElementById(`slot-name-${id}`),
-    mid:      document.getElementById(`slot-mid-${id}`),
-    clearBtn: document.getElementById(`slot-clear-${id}`),
-    openBtn:  document.getElementById(`slot-open-${id}`),
-    dlBtn:    document.getElementById(`slot-dl-${id}`),
+    root:    document.getElementById(`slot-${id}`),
+    name:    document.getElementById(`slot-name-${id}`),
+    mid:     document.getElementById(`slot-mid-${id}`),
+    openBtn: document.getElementById(`slot-open-${id}`),
+    dlBtn:   document.getElementById(`slot-dl-${id}`),
   };
 }
 
@@ -163,9 +162,8 @@ function render(id) {
   };
   e.mid.innerHTML = statusHTML[slot.state] ?? '';
 
-  e.clearBtn.hidden = slot.state === 'idle' || slot.state === 'processing' || slot.state === 'done';
-  e.openBtn.hidden  = slot.state !== 'done';
-  e.dlBtn.hidden    = slot.state !== 'done';
+  e.openBtn.hidden = slot.state !== 'done';
+  e.dlBtn.hidden   = slot.state !== 'done';
 }
 
 function findTargetSlot() {
@@ -297,8 +295,7 @@ closePreviewBtn.addEventListener('click', () => {
 
 for (let i = 0; i < SLOT_COUNT; i++) {
   const id = i;
-  const e  = els(id);
-  e.clearBtn.addEventListener('click', () => clearSlot(id));
-  e.openBtn.addEventListener('click',  () => openSlot(id));
-  e.dlBtn.addEventListener('click',    () => downloadSlot(id));
+  const e = els(id);
+  e.openBtn.addEventListener('click', () => openSlot(id));
+  e.dlBtn.addEventListener('click',   () => downloadSlot(id));
 }
