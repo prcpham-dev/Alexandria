@@ -21,19 +21,35 @@ _STRIP_PREFIX = re.compile(
     r"(?=\S)"
 )
 
-_SKIP_LINE = re.compile(
+_TIMESTAMP = re.compile(
     r"^"
     r"(?:"
         r"\d{1,2}:\d{2}(?::\d{2})?"
         r"|"
+        r"\d+\s+hours?,\s*\d+\s+minutes?,\s*\d+\s+seconds?"
+        r"|"
+        r"\d+\s+hours?,\s*\d+\s+minutes?"
+        r"|"
+        r"\d+\s+hours?,\s*\d+\s+seconds?"
+        r"|"
         r"\d+\s+minutes?,\s*\d+\s+seconds?"
         r"|"
-        r"\d+\s+hours?,\s*\d+\s+minutes?,\s*\d+\s+seconds?"
-    r")\s*$"
+        r"\d+\s+hours?"
+        r"|"
+        r"\d+\s+minutes?"
+        r"|"
+        r"\d+\s+seconds?"
+    r")"
 )
+
+_SKIP_LINE   = re.compile(_TIMESTAMP.pattern + r"\s*$")
+_STRIP_TIMESTAMP_PREFIX = re.compile(_TIMESTAMP.pattern + r"\s+")
+
+_STANDALONE_NUMBER = re.compile(r"^\d+\s*$")
 
 
 def strip_prefix(text: str) -> str:
+    text = _STRIP_TIMESTAMP_PREFIX.sub("", text)
     return _STRIP_PREFIX.sub("", text).strip()
 
 
@@ -46,7 +62,7 @@ def process_paragraphs(raw_lines: list) -> list:
         if not text:
             continue
         first_char = text[0]
-        if paragraphs and first_char.islower():
+        if paragraphs and (first_char.islower() or _STANDALONE_NUMBER.match(text)):
             paragraphs[-1] = paragraphs[-1].rstrip() + " " + text
         else:
             if paragraphs:
