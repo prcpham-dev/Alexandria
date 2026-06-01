@@ -29,9 +29,6 @@ function ensurePeriod(text) {
   return text && !'.!?…'.includes(text.at(-1)) ? text + '.' : text;
 }
 
-function isLower(ch) {
-  return ch.toLowerCase() === ch && ch.toUpperCase() !== ch;
-}
 
 function processParagraphs(rawLines) {
   const out = [];
@@ -43,6 +40,7 @@ function processParagraphs(rawLines) {
     if (!stripped) continue;
     if (RX_SKIP_LINE.test(stripped)) { afterTimestamp = true; continue; }
 
+    const hadBrackets  = /\[.*?\]/.test(stripped);
     const hadTimestamp = RX_STRIP_TS_PREFIX.test(stripped);
     const text = stripPrefix(stripped);
 
@@ -52,11 +50,19 @@ function processParagraphs(rawLines) {
       continue;
     }
 
-    const fc = text[0];
-    const prevEndsWithPunct = out.length > 0 && '.!?…'.includes(out[out.length - 1].at(-1));
-    const forceNew = afterTimestamp && prevEndsWithPunct;
+    const isNextLower = /^\p{Ll}/u.test(text);
 
-    if (!forceNew && out.length > 0 && (joinNext || hadTimestamp || isLower(fc) || /^\d/.test(fc))) {
+    // Force new paragraph when a skipped timestamp or bracket was followed by
+    // an uppercase line — clear signal of a new sentence or speaker.
+    const forceNew = (afterTimestamp || hadBrackets) && !isNextLower;
+
+    const shouldJoin = !forceNew && out.length > 0 && (
+      joinNext      ||
+      hadTimestamp  ||
+      isNextLower
+    );
+
+    if (shouldJoin) {
       out[out.length - 1] = out[out.length - 1].trimEnd() + ' ' + text;
     } else {
       if (out.length > 0) {
