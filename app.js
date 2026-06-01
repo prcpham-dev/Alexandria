@@ -128,7 +128,55 @@ async function processDocx(file) {
   return { paragraphs: cleaned, docx_b64, filename };
 }
 
-// ── Slot state management ─────────────────────────────────────────────────────
+// ── .pdf in-browser processing ────────────────────────────────────────────────────
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/legacy/build/pdf.worker.min.js';
+
+async function processPdf(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+  const rawLines = [];
+  for (let i = 1; i <= pdfDoc.numPages; i++) {
+    const page = await pdfDoc.getPage(i);
+    const content = await page.getTextContent();
+    let line = '';
+    for (const item of content.items) {
+      line += item.str;
+      if (item.hasEOL) { rawLines.push(line); line = ''; }
+    }
+    if (line.trim()) rawLines.push(line);
+  }
+
+  const cleaned = processParagraphs(rawLines);
+
+  const zip = new JSZip();
+  zip.file('word/document.xml', buildDocXml(cleaned, ''));
+  zip.file('[Content_Types].xml',
+    '<?xml version="1.0" encoding="UTF-8"?>'
+    + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    + '<Default Extension="xml" ContentType="application/xml"/>'
+    + '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+    + '</Types>');
+  zip.file('_rels/.rels',
+    '<?xml version="1.0" encoding="UTF-8"?>'
+    + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
+    + '</Relationships>');
+  zip.file('word/_rels/document.xml.rels',
+    '<?xml version="1.0" encoding="UTF-8"?>'
+    + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>');
+
+  const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+  const docx_b64 = btoa(Array.from(bytes, b => String.fromCharCode(b)).join(''));
+  const filename = file.name.replace(/\.pdf$/i, '_cleaned.docx');
+
+  return { paragraphs: cleaned, docx_b64, filename };
+}
+
+// ── Slot state management ────────────────────────────────────────────────────────
 
 const SLOT_COUNT = 3;
 
@@ -189,7 +237,8 @@ function findTargetSlot() {
 }
 
 function assignFile(file) {
-  if (!file || !file.name.toLowerCase().endsWith('.docx')) return;
+  const name = file.name.toLowerCase();
+  if (!file || (!name.endsWith('.docx') && !name.endsWith('.pdf'))) return;
   const id = findTargetSlot();
   if (id === null) return;
 
@@ -218,7 +267,9 @@ async function processSlot(id) {
   render(id);
 
   try {
-    slot.result = await processDocx(slot.file);
+    slot.result = slot.file.name.toLowerCase().endsWith('.pdf')
+      ? await processPdf(slot.file)
+      : await processDocx(slot.file);
     slot.state = 'done';
   } catch (err) {
     slot.error = err.message;
