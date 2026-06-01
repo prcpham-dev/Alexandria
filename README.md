@@ -10,9 +10,5 @@ Upload a `.docx` file → timestamps and time labels are removed → preview the
 ```
 ├── index.html        Web page
 ├── style.css         Styles
-├── app.js            Frontend logic
-├── api/
-│   └── process.py    Vercel serverless function
-├── requirements.txt  Python dependency (python-docx)
-└── vercel.json       Vercel config
+└── app.js            Frontend logic
 ```
