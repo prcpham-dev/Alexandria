@@ -173,6 +173,16 @@ body {
   transform: none;
 }
 
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
 .btn-ghost {
   background: none;
   border: 1px solid var(--border);
@@ -367,3 +377,179 @@ body {
     font-size: 0.85rem;
   }
 }
+
+/* ── Slots ── */
+.slots {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-height: 52px;
+  transition: border-color 0.2s;
+}
+
+.slot-num {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.slot-name {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.slot[data-state]:not([data-state="idle"]) .slot-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.slot-mid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.slot-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.slot-clear-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.15s;
+  line-height: 1;
+}
+.slot-clear-btn:hover { color: var(--error); }
+
+.slot-open-btn {
+  padding: 6px 12px !important;
+  font-size: 0.8rem !important;
+  margin-top: 0 !important;
+  width: auto !important;
+}
+
+.btn-icon {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  transition: opacity 0.2s;
+  font-family: inherit;
+}
+.btn-icon:hover { opacity: 0.85; }
+
+/* Slot status elements */
+.slot-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(167, 139, 250, 0.3);
+  border-top-color: var(--accent2);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.slot-status-text {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.slot-done-icon {
+  color: var(--success);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.slot-error-icon {
+  color: var(--error);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.slot-error-text {
+  color: var(--error);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Preview divider and tabs ── */
+.preview-divider {
+  border-top: 1px solid var(--border);
+  margin: 24px 0 20px;
+}
+
+.preview-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-tab {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.preview-tab:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+.preview-tab.active {
+  background: rgba(108, 99, 255, 0.15);
+  border-color: var(--accent);
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+.preview-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+

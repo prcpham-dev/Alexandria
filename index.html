@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alexandria</title>
   <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>" />
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><path d=%22M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z%22 fill=%22%237c6ff7%22/><path d=%22M14 2L14 8L20 8Z%22 fill=%22%235a4fd4%22/></svg>" />
   <meta name="description"
-    content="Upload a Word document and get a cleaned version with timestamps and time labels removed." />
+    content="Upload Word documents — timestamps removed, paragraphs cleaned. Process up to 3 at once." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
@@ -17,41 +17,79 @@
 <body>
 
   <header class="header">
-    <h1>📄 Alexandria</h1>
-    <p>Upload a Word document — timestamps and time labels are removed, paragraphs are cleaned up automatically.</p>
+    <h1>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="30" height="30"
+        style="vertical-align:-4px;margin-right:8px">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" fill="#7c6ff7" />
+        <path d="M14 2v6h6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>Alexandria
+    </h1>
+    <p>Drop up to 3 documents — each processed in parallel, results ready independently.</p>
   </header>
 
   <main class="card">
 
-    <!-- Upload section -->
-    <section id="uploadSection">
-      <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".docx" />
-        <span class="drop-icon">📂</span>
-        <div class="label">Drop your .docx file here</div>
-        <div class="sublabel">or tap to browse</div>
-      </div>
+    <!-- Single drop zone -->
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".docx" />
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="40" height="40"
+        class="drop-icon">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" fill="#7c6ff7" />
+        <path d="M14 2v6h6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="label">Drop .docx here</div>
+      <div class="sublabel">or tap to browse</div>
+    </div>
 
-      <div class="file-chip" id="fileChip">
-        <span>📄</span>
-        <span class="name" id="fileName"></span>
-        <button class="remove" id="removeFile" title="Remove file">✕</button>
-      </div>
+    <!-- 3 slots -->
+    <div class="slots" id="slotsPanel">
 
-      <button class="btn" id="processBtn" disabled>
-        Clean Document
-      </button>
-    </section>
-
-    <!-- Preview section (hidden until processed) -->
-    <section id="previewSection" hidden>
-      <div class="preview-header">
-        <div class="preview-meta" id="previewMeta"></div>
-        <div class="preview-actions">
-          <button class="btn-ghost" id="backBtn">← New file</button>
-          <button class="btn" id="downloadBtn">⬇ Download .docx</button>
+      <div class="slot" id="slot-0" data-state="idle">
+        <span class="slot-num">01</span>
+        <span class="slot-name" id="slot-name-0">—</span>
+        <div class="slot-mid" id="slot-mid-0"></div>
+        <div class="slot-actions">
+          <button class="slot-clear-btn" id="slot-clear-0" hidden title="Clear slot">✕</button>
+          <button class="btn-ghost slot-open-btn" id="slot-open-0" hidden>Open</button>
+          <button class="btn-icon slot-dl-btn" id="slot-dl-0" hidden title="Download">⬇</button>
         </div>
       </div>
+
+      <div class="slot" id="slot-1" data-state="idle">
+        <span class="slot-num">02</span>
+        <span class="slot-name" id="slot-name-1">—</span>
+        <div class="slot-mid" id="slot-mid-1"></div>
+        <div class="slot-actions">
+          <button class="slot-clear-btn" id="slot-clear-1" hidden title="Clear slot">✕</button>
+          <button class="btn-ghost slot-open-btn" id="slot-open-1" hidden>Open</button>
+          <button class="btn-icon slot-dl-btn" id="slot-dl-1" hidden title="Download">⬇</button>
+        </div>
+      </div>
+
+      <div class="slot" id="slot-2" data-state="idle">
+        <span class="slot-num">03</span>
+        <span class="slot-name" id="slot-name-2">—</span>
+        <div class="slot-mid" id="slot-mid-2"></div>
+        <div class="slot-actions">
+          <button class="slot-clear-btn" id="slot-clear-2" hidden title="Clear slot">✕</button>
+          <button class="btn-ghost slot-open-btn" id="slot-open-2" hidden>Open</button>
+          <button class="btn-icon slot-dl-btn" id="slot-dl-2" hidden title="Download">⬇</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Preview panel -->
+    <section id="previewSection" hidden>
+      <div class="preview-divider"></div>
+      <div class="preview-header">
+        <div class="preview-tabs" id="previewTabs"></div>
+        <div class="preview-actions">
+          <button class="btn-ghost" id="closePreviewBtn">✕ Close</button>
+          <button class="btn" id="downloadBtn">⬇ Download</button>
+        </div>
+      </div>
+      <div class="preview-meta" id="previewMeta"></div>
       <div class="preview-body" id="previewBody"></div>
     </section>
 

@@ -48,10 +48,6 @@ def strip_prefix(text: str) -> str:
     text = _STRIP_TRAILING.sub("", text)
     return text.strip()
 
-def _last_word_capitalized(text: str) -> bool:
-    words = text.split()
-    return bool(words) and words[-1][0].isupper()
-
 
 def _ensure_period(text: str) -> str:
     if text and text[-1] not in '.!?…':
@@ -63,20 +59,21 @@ def process_paragraphs(raw_lines: list) -> list:
     paragraphs = []
     join_next = False
     for raw in raw_lines:
-        if _SKIP_LINE.match(raw.strip()):
+        raw_stripped = raw.strip()
+        if _SKIP_LINE.match(raw_stripped):
             continue
+        had_timestamp = bool(_STRIP_TIMESTAMP_PREFIX.match(raw_stripped))
         text = strip_prefix(raw).strip()
         if not text:
-            if raw.strip():
+            if raw_stripped:
                 join_next = True
             continue
         first_char = text[0]
-        prev = paragraphs[-1] if paragraphs else ""
         if paragraphs and (
             join_next
+            or had_timestamp
             or first_char.islower()
             or first_char.isdigit()
-            or (first_char.isupper() and _last_word_capitalized(prev))
         ):
             paragraphs[-1] = paragraphs[-1].rstrip() + " " + text
         else:
