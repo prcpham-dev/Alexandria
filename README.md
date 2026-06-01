@@ -1,4 +1,4 @@
-# Doc Cleaner
+# Alexandria
 
 A simple web app that cleans up Word documents exported from transcript tools.
 
