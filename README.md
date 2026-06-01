@@ -1,4 +1,4 @@
-# Alexandria – Transcript Cleaner
+# Alexandria
 
 Removes line numbers and timestamps from Word documents, and merges/splits paragraphs based on capitalisation. (For mom)
 
