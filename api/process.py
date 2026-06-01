@@ -13,9 +13,6 @@ import base64
 
 from docx import Document
 
-
-# ── Filter logic ──────────────────────────────────────────────────────────────
-
 _STRIP_PREFIX = re.compile(
     r"^"
     r"(?:"
@@ -84,8 +81,6 @@ def process_docx_bytes(file_bytes: bytes) -> tuple:
     out.seek(0)
     return cleaned, out.read()
 
-
-# ── Vercel handler ────────────────────────────────────────────────────────────
 
 class handler(BaseHTTPRequestHandler):
 

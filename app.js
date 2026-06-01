@@ -1,4 +1,3 @@
-// ── Elements ───────────────────────────────────────────────────────────────
 const uploadSection = document.getElementById('uploadSection');
 const previewSection = document.getElementById('previewSection');
 
@@ -15,12 +14,10 @@ const previewBody = document.getElementById('previewBody');
 const downloadBtn = document.getElementById('downloadBtn');
 const backBtn     = document.getElementById('backBtn');
 
-// ── State ──────────────────────────────────────────────────────────────────
 let selectedFile = null;
 let resultDocxB64 = null;
 let resultFilename = null;
 
-// ── File selection ──────────────────────────────────────────────────────────
 function setFile(file) {
   if (!file || !file.name.endsWith('.docx')) {
     setStatus('error', 'Please upload a .docx file.');
@@ -41,7 +38,6 @@ function clearFile() {
   clearStatus();
 }
 
-// ── Status ──────────────────────────────────────────────────────────────────
 function setStatus(type, msg) {
   statusEl.className = 'status ' + type;
   statusEl.innerHTML = type === 'loading'
@@ -54,16 +50,13 @@ function clearStatus() {
   statusEl.textContent = '';
 }
 
-// ── Show / hide sections ────────────────────────────────────────────────────
 function showPreview(data) {
   resultDocxB64  = data.docx_b64;
   resultFilename = data.filename;
 
-  // Count real paragraphs (non-empty strings)
   const realParas = data.paragraphs.filter(p => p.trim() !== '');
   previewMeta.textContent = `${realParas.length} paragraph${realParas.length !== 1 ? 's' : ''} · ${selectedFile.name}`;
 
-  // Render paragraphs
   previewBody.innerHTML = '';
   data.paragraphs.forEach(p => {
     const el = document.createElement('p');
@@ -84,7 +77,6 @@ function showUpload() {
   resultFilename = null;
 }
 
-// ── Download ────────────────────────────────────────────────────────────────
 function downloadDocx() {
   if (!resultDocxB64) return;
   const bytes = Uint8Array.from(atob(resultDocxB64), c => c.charCodeAt(0));
@@ -97,7 +89,6 @@ function downloadDocx() {
   URL.revokeObjectURL(url);
 }
 
-// ── Events ──────────────────────────────────────────────────────────────────
 fileInput.addEventListener('change', () => {
   if (fileInput.files[0]) setFile(fileInput.files[0]);
 });
@@ -106,7 +97,6 @@ removeFile.addEventListener('click', clearFile);
 backBtn.addEventListener('click', showUpload);
 downloadBtn.addEventListener('click', downloadDocx);
 
-// Drag & drop
 dropZone.addEventListener('dragover', e => {
   e.preventDefault();
   dropZone.classList.add('drag-over');
@@ -119,7 +109,6 @@ dropZone.addEventListener('drop', e => {
   if (file) setFile(file);
 });
 
-// Process
 processBtn.addEventListener('click', async () => {
   if (!selectedFile) return;
 
@@ -137,7 +126,7 @@ processBtn.addEventListener('click', async () => {
 
     showPreview(data);
   } catch (err) {
-    setStatus('error', '❌ ' + err.message);
+    setStatus('error', err.message);
     processBtn.disabled = false;
   }
 });

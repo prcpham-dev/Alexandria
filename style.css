@@ -1,11 +1,9 @@
-/* ── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* ── Design tokens ──────────────────────────────────────── */
 :root {
   --bg:       #0f1117;
   --surface:  #1a1d27;
@@ -19,7 +17,6 @@
   --radius:   16px;
 }
 
-/* ── Base ───────────────────────────────────────────────── */
 body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
@@ -32,7 +29,6 @@ body {
   padding: 24px 16px;
 }
 
-/* ── Header ─────────────────────────────────────────────── */
 .header {
   text-align: center;
   margin-bottom: 32px;
@@ -55,7 +51,6 @@ body {
   max-width: 380px;
 }
 
-/* ── Card ───────────────────────────────────────────────── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -66,7 +61,6 @@ body {
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* ── Drop zone ──────────────────────────────────────────── */
 .drop-zone {
   border: 2px dashed var(--border);
   border-radius: 12px;
@@ -110,7 +104,6 @@ body {
   margin-top: 4px;
 }
 
-/* ── File chip ──────────────────────────────────────────── */
 .file-chip {
   display: none;
   align-items: center;
@@ -150,7 +143,6 @@ body {
   color: var(--error);
 }
 
-/* ── Buttons ─────────────────────────────────────────────── */
 .btn {
   display: flex;
   align-items: center;
@@ -198,7 +190,6 @@ body {
   color: var(--accent2);
 }
 
-/* ── Status ─────────────────────────────────────────────── */
 .status {
   margin-top: 14px;
   font-size: 0.875rem;
@@ -214,7 +205,6 @@ body {
 .status.error   { color: var(--error); }
 .status.loading { color: var(--muted); }
 
-/* ── Spinner ─────────────────────────────────────────────── */
 .spinner {
   width: 15px;
   height: 15px;
@@ -234,7 +224,6 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ── Info tags ───────────────────────────────────────────── */
 .info {
   margin-top: 24px;
   padding-top: 20px;
@@ -266,7 +255,6 @@ body {
   font-family: monospace;
 }
 
-/* ── Preview section ─────────────────────────────────────── */
 .preview-header {
   display: flex;
   align-items: center;
@@ -313,7 +301,6 @@ body {
   height: 0.8em;
 }
 
-/* Scrollbar styling */
 .preview-body::-webkit-scrollbar { width: 6px; }
 .preview-body::-webkit-scrollbar-track { background: transparent; }
 .preview-body::-webkit-scrollbar-thumb {
@@ -321,7 +308,6 @@ body {
   border-radius: 3px;
 }
 
-/* ── Footer ──────────────────────────────────────────────── */
 .footer {
   margin-top: 24px;
   font-size: 0.72rem;
@@ -329,7 +315,6 @@ body {
   text-align: center;
 }
 
-/* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 480px) {
   body {
     padding: 20px 12px;
