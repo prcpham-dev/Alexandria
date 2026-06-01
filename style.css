@@ -164,7 +164,7 @@ body {
 
 .btn:hover:not(:disabled) {
   opacity: 0.9;
-  transform: translateY(-1px);
+  transform: scale(1.02);
 }
 
 .btn:disabled {
@@ -192,12 +192,13 @@ body {
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, transform 0.15s;
 }
 
 .btn-ghost:hover {
   border-color: var(--accent2);
   color: var(--accent2);
+  transform: scale(1.02);
 }
 
 .btn-ghost-purple {
@@ -209,10 +210,12 @@ body {
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
 }
 .btn-ghost-purple:hover {
-  background: rgba(248, 113, 113, 0.12);
+  background: var(--error);
+  color: #fff;
+  transform: scale(1.02);
 }
 
 .status {
