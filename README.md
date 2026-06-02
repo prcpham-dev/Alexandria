@@ -1,6 +1,6 @@
 # Alexandria
 
-A simple web app that cleans up Word documents exported from transcript tools.
+Removes line numbers and timestamps from Word documents, and merges/splits paragraphs. (For mom)
 
 Upload a `.docx` file → timestamps and time labels are removed → preview the result → download the cleaned file.
 
